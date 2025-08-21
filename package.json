@@ -9,12 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vapi-ai/web": "^1.0.0"
+    "@vapi-ai/web": "^2.3.8"
   },
   "devDependencies": {
     "vite": "^5.0.0"
   },
-  "keywords": ["voice", "chatbot", "vapi", "ai"],
+  "keywords": [
+    "voice",
+    "chatbot",
+    "vapi",
+    "ai"
+  ],
   "author": "Your Name",
   "license": "MIT"
 }
