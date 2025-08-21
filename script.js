@@ -23,9 +23,6 @@ try {
 // State variables
 let isCallActive = false;
 let currentCallMode = null;
-let callStartTime = null;
-let callDurationInterval = null;
-let callEndTimer = null;
 let isMuted = false;
 let messageCountValue = 0;
 let userMessageCount = 0;
@@ -36,79 +33,17 @@ let lastMessageTime = null;
 let conversationSummary = null;
 let conversationSentiment = null;
 
-// Call mode configurations with structured feedback prompts and different Vapi assistant IDs
+// Call mode configurations - simplified for Vapi API usage
 const CALL_MODES = {
     LEARNING: {
         id: 'learning',
         name: 'Learning & Feedback',
-        icon: 'fas fa-graduation-cap',
-        color: 'learning-mode',
-        purpose: 'Educational and feedback sessions',
-        description: 'Perfect for training, feedback sessions, and educational purposes',
-        duration: '3',
-        vapiAssistantId: 'c036cff9-6a41-4a7d-bcf0-599d186e1b03', // Learning Feedback Assistant ID
-        systemPrompt: `You are Cameron, a feedback collection assistant for our Learning Platform. You conduct structured feedback calls with users about their Learning experiences.
-
-IMPORTANT: You must ask ALL 4 questions before ending the call. Do not end the call until all questions are answered.
-
-CONVERSATION FLOW:
-1. Introduction: "Hello, this is Cameron from our Learning Platform. We're conducting a survey about your recent learning experience. This will help us improve our services. Would you like to participate?"
-
-2. If yes, ask these questions in order (DO NOT END CALL UNTIL ALL ARE ANSWERED):
-   - "On a scale of 1-5, how satisfied are you with the quality of the courses?" (If 1-2 or 5, ask "Could you share what led you to that rating?")
-   - "What do you like most about the online learning experience?"
-   - "What could we improve to make learning easier or more effective for you?"
-   - "How easy is it to navigate and use the app?" (1-5 scale)
-
-3. Only after ALL 4 questions are answered, say: "Thank you for taking the time to share your feedback. Have a wonderful day!"
-
-4. IMPORTANT: After the conversation ends, output ONLY this JSON format:
-{
-  "summary": [
-    "Key point 1",
-    "Key point 2", 
-    "Key point 3"
-  ],
-  "sentiment": "Positive|Neutral|Negative"
-}`,
-        firstMessage: "Hello, this is Cameron from our Learning Platform. We're conducting a survey about your recent learning experience. This will help us improve our services. Would you like to participate?",
-        maxDuration: null // No time limit - call continues until all questions are done
+        vapiAssistantId: 'c036cff9-6a41-4a7d-bcf0-599d186e1b03' // Learning Feedback Assistant ID
     },
     PATIENT: {
         id: 'patient',
         name: 'Patient Care',
-        icon: 'fas fa-user-injured',
-        color: 'patient-mode',
-        purpose: 'Patient interactions and medical consultations',
-        description: 'Optimized for patient interactions, medical consultations, and care',
-        duration: '2',
-        vapiAssistantId: '081cc9ae-0db3-4a4f-9bc1-d0c3fd13bad1', // Patient Feedback Assistant ID
-        systemPrompt: `You are Cameron, a feedback collection assistant for our Medical Platform. You conduct structured feedback calls with users about their Medical Consultation experiences.
-
-IMPORTANT: You must ask ALL 4 questions before ending the call. Do not end the call until all questions are answered.
-
-CONVERSATION FLOW:
-1. Introduction: "Hello, this is Cameron from our Medical Platform. We're conducting a survey about your recent medical consultation experience. This will help us improve our services. Would you like to participate?"
-
-2. If yes, ask these questions in order (DO NOT END CALL UNTIL ALL ARE ANSWERED):
-   - "On a scale of 1-5, how satisfied are you with the medical consultation process in the app?" (If 1-2 or 5, ask "Could you share what led you to that rating?")
-   - "Thinking about your last consultation, what went particularly well?"
-   - "What aspects of the medical service could be improved?"
-   - "How easy is it to navigate and use the app?" (1-5 scale)
-
-3. Only after ALL 4 questions are answered, say: "Thank you for taking the time to share your feedback. Have a wonderful day!"
-
-4. IMPORTANT: After the conversation ends, output ONLY this JSON format:
-{
-  "summary": [
-    "Key point 1",
-    "Key point 2",
-    "Key point 3"
-  ],
-  "sentiment": "Positive|Neutral|Negative"
-}`,
-        firstMessage: "Hello, this is Cameron from our Medical Platform. We're conducting a survey about your recent medical consultation experience. This will help us improve our services. Would you like to participate?",
-        maxDuration: null // No time limit - call continues until all questions are done
+        vapiAssistantId: '081cc9ae-0db3-4a4f-9bc1-d0c3fd13bad1' // Patient Feedback Assistant ID
     }
 };
 
@@ -179,7 +114,6 @@ function setupVapiEvents() {
         updateStatus('In Call');
         updateConnectionStatus('Connected');
         showCallControls();
-        startCallTimer();
         
         const firstMessage = currentCallMode?.firstMessage || "Call started! I can hear you now.";
         addMessage('bot', firstMessage);
@@ -209,7 +143,6 @@ function setupVapiEvents() {
         }
         
         hideCallControls();
-        stopCallTimer();
         addMessage('bot', 'Call ended. Click start call to begin a new conversation.');
         currentCallMode = null;
     });
@@ -291,7 +224,6 @@ async function startCall(mode) {
         if (patientCallBtn) patientCallBtn.disabled = true;
         
         console.log('Calling vapi.start with assistant ID:', currentCallMode.vapiAssistantId);
-        console.log('System prompt:', currentCallMode.systemPrompt);
         
         // Start the call with your specific Vapi assistant ID
         await vapi.start(currentCallMode.vapiAssistantId);
@@ -301,14 +233,12 @@ async function startCall(mode) {
         isCallActive = true;
         addMessage('bot', `Starting ${currentCallMode.name} call...`);
         
-        // Show call controls and start timers
+        // Show call controls
         showCallControls();
-        startCallTimer();
-        // startCountdownTimer(); // Removed countdown timer
         
-        // Add the first message for the selected mode
+        // Add a simple start message
         setTimeout(() => {
-            addMessage('bot', currentCallMode.firstMessage);
+            addMessage('bot', `Call started in ${currentCallMode.name} mode. You can now speak with the AI assistant.`);
         }, 1000);
         
     } catch (error) {
@@ -470,25 +400,6 @@ function hideCallControls() {
     const summarySection = document.getElementById('summarySection');
     if (summarySection) {
         summarySection.style.display = 'none';
-    }
-}
-
-// Start call timer
-function startCallTimer() {
-    callStartTime = Date.now();
-    callDurationInterval = setInterval(updateCallDuration, 1000);
-    
-    // No countdown timer needed - call continues until all questions are done
-}
-
-// Update call duration
-function updateCallDuration() {
-    if (callStartTime) {
-        const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        // Note: callDuration element is hidden, but we keep the timer for logging
-        console.log(`Call duration: ${minutes}:${seconds.toString().padStart(2, '0')}`);
     }
 }
 

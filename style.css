@@ -586,20 +586,6 @@ body {
     line-height: 1.4;
 }
 
-.time-limit {
-    margin: 8px 0 0 0;
-    font-size: 0.8rem;
-    color: #667eea;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.time-limit i {
-    font-size: 0.9rem;
-}
-
 /* Call Mode Buttons */
 .btn-success {
     background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
@@ -708,104 +694,6 @@ body {
 .info-item.status-item:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Countdown Timer */
-.countdown-section {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 15px;
-    border: 2px solid #e9ecef;
-}
-
-.countdown-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-}
-
-.countdown-info i {
-    color: #667eea;
-    font-size: 1.2rem;
-    width: 20px;
-}
-
-.countdown-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.countdown-content label {
-    font-size: 0.8rem;
-    color: #666;
-    font-weight: 500;
-}
-
-.countdown-time {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
-    font-family: 'Courier New', monospace;
-}
-
-.countdown-warning {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 8px;
-    color: #856404;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.countdown-warning i {
-    color: #f39c12;
-}
-
-.countdown-warning.show {
-    animation: pulse-warning 1s infinite;
-}
-
-@keyframes pulse-warning {
-    0% {
-        background: #fff3cd;
-        border-color: #ffeaa7;
-    }
-    50% {
-        background: #ffeaa7;
-        border-color: #f39c12;
-    }
-    100% {
-        background: #fff3cd;
-        border-color: #ffeaa7;
-    }
-}
-
-/* Countdown states */
-.countdown-time.warning {
-    color: #f39c12;
-}
-
-.countdown-time.danger {
-    color: #e74c3c;
-    animation: pulse-danger 1s infinite;
-}
-
-@keyframes pulse-danger {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 1;
-    }
 }
 
 /* iPhone-style Chat Interface */
@@ -1220,13 +1108,9 @@ body {
     color: #667eea;
 }
 
-.call-timer {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
-    font-family: 'Courier New', monospace;
-}
+/* Call Timer - Removed */
 
+/* Call Controls */
 .call-controls {
     display: flex;
     justify-content: center;
@@ -1265,52 +1149,7 @@ body {
     background: #c0392b;
 }
 
-/* Countdown Display */
-.countdown-display {
-    text-align: center;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 15px;
-    border: 2px solid #e9ecef;
-}
-
-.countdown-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.countdown-info i {
-    color: #667eea;
-    font-size: 1.2rem;
-}
-
-.countdown-info span {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #333;
-    font-family: 'Courier New', monospace;
-}
-
-.countdown-warning {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 8px;
-    color: #856404;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.countdown-warning i {
-    color: #f39c12;
-}
+/* Countdown Display - Removed */
 
 /* Text Input Section */
 .text-input-section {

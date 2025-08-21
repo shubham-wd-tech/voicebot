@@ -2,16 +2,14 @@
 
 A modern, responsive voice chat bot website powered by Vapi AI. This application allows users to have voice conversations with an AI assistant using their microphone.
 
-## Features
+## ✨ **Features:**
 
-- 🎤 **Voice Chat**: Real-time voice conversations with AI
-- 💬 **Text Input**: Alternative text-based communication
-- 🎵 **Voice Control**: Mute/unmute functionality
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- 🎨 **Modern UI**: Beautiful gradient design with smooth animations
-- ⏱️ **Call Timer**: Track conversation duration
-- 🔊 **Volume Monitoring**: Real-time volume level display
-- 🔄 **Real-time Updates**: Live status and message updates
+- 🎯 **Dual Call Modes**: Learning & Feedback + Patient Care
+- 🤖 **Vapi AI Integration**: Real-time voice conversations
+- 📊 **Call Summary**: Automatic feedback summary with sentiment analysis
+- 🎨 **Clean UI**: Minimal, focused interface
+- 📱 **Responsive Design**: Works on all devices
+- 🔄 **No Time Limits**: Calls continue until all questions are completed
 
 ## Prerequisites
 
