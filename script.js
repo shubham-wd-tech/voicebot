@@ -20,14 +20,6 @@ try {
     console.log('Using mock Vapi object for testing');
 }
 
-// DOM elements
-const learningCallBtn = document.getElementById('learningCallBtn');
-const patientCallBtn = document.getElementById('patientCallBtn');
-const learningEndCallBtn = document.getElementById('learningEndCallBtn');
-const patientEndCallBtn = document.getElementById('patientEndCallBtn');
-const chatMessages = document.getElementById('chatMessages');
-const messageCount = document.getElementById('messageCount');
-
 // State variables
 let isCallActive = false;
 let currentCallMode = null;
@@ -123,27 +115,29 @@ CONVERSATION FLOW:
 // Initialize the app
 function init() {
     console.log('Initializing voice chat bot...');
-    console.log('Vapi instance:', vapi);
-    console.log('VAPI_PUBLIC_KEY:', VAPI_PUBLIC_KEY);
     
-    // Check if DOM elements are found
-    console.log('Learning call button:', learningCallBtn);
-    console.log('Patient call button:', patientCallBtn);
-    
-    setupEventListeners();
-    setupVapiEvents();
-    detectBrowserInfo();
-    addLog('System initialized', 'info');
-    updateAnalytics();
-    
-    console.log('Initialization complete');
+    // Wait a bit to ensure DOM is fully loaded
+    setTimeout(() => {
+        setupEventListeners();
+        setupVapiEvents();
+        detectBrowserInfo();
+        addLog('System initialized', 'info');
+        updateAnalytics();
+        console.log('Initialization complete');
+    }, 100);
 }
 
 // Setup event listeners
 function setupEventListeners() {
     console.log('Setting up event listeners...');
     
-    // Check if buttons exist before adding listeners
+    // Get fresh references to DOM elements
+    const learningCallBtn = document.getElementById('learningCallBtn');
+    const patientCallBtn = document.getElementById('patientCallBtn');
+    const learningEndCallBtn = document.getElementById('learningEndCallBtn');
+    const patientEndCallBtn = document.getElementById('patientEndCallBtn');
+    
+    // Setup Learning Call Button
     if (learningCallBtn) {
         console.log('Learning call button found, adding listener');
         learningCallBtn.addEventListener('click', () => {
@@ -154,6 +148,7 @@ function setupEventListeners() {
         console.error('Learning call button not found!');
     }
     
+    // Setup Patient Call Button
     if (patientCallBtn) {
         console.log('Patient call button found, adding listener');
         patientCallBtn.addEventListener('click', () => {
@@ -164,6 +159,7 @@ function setupEventListeners() {
         console.error('Patient call button not found!');
     }
     
+    // Setup End Call Buttons
     if (learningEndCallBtn) {
         learningEndCallBtn.addEventListener('click', stopCall);
     }
@@ -171,10 +167,6 @@ function setupEventListeners() {
     if (patientEndCallBtn) {
         patientEndCallBtn.addEventListener('click', stopCall);
     }
-    
-    // Removed stopCallBtn and muteBtn listeners as they are no longer in DOM
-    
-    // Removed sendTextBtn and textInput listeners as they are no longer in DOM
     
     console.log('Event listeners setup complete');
 }
@@ -203,12 +195,15 @@ function setupVapiEvents() {
         // Check if we have a summary, if not try to parse from recent messages
         if (!conversationSummary) {
             // Look through recent messages for summary
-            const recentMessages = chatMessages.querySelectorAll('.message.bot-message');
-            for (let i = recentMessages.length - 1; i >= 0; i--) {
-                const messageContent = recentMessages[i].textContent;
-                if (messageContent.includes('{') && messageContent.includes('"summary"')) {
-                    parseConversationSummary(messageContent);
-                    break;
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                const recentMessages = chatMessages.querySelectorAll('.message.bot-message');
+                for (let i = recentMessages.length - 1; i >= 0; i--) {
+                    const messageContent = recentMessages[i].textContent;
+                    if (messageContent.includes('{') && messageContent.includes('"summary"')) {
+                        parseConversationSummary(messageContent);
+                        break;
+                    }
                 }
             }
         }
@@ -290,8 +285,10 @@ async function startCall(mode) {
         updateConnectionStatus('Connecting...');
         
         // Disable both call buttons
-        learningCallBtn.disabled = true;
-        patientCallBtn.disabled = true;
+        const learningCallBtn = document.getElementById('learningCallBtn');
+        const patientCallBtn = document.getElementById('patientCallBtn');
+        if (learningCallBtn) learningCallBtn.disabled = true;
+        if (patientCallBtn) patientCallBtn.disabled = true;
         
         console.log('Calling vapi.start with assistant ID:', currentCallMode.vapiAssistantId);
         console.log('System prompt:', currentCallMode.systemPrompt);
@@ -321,8 +318,10 @@ async function startCall(mode) {
         updateConnectionStatus('Error');
         
         // Re-enable call buttons on error
-        learningCallBtn.disabled = false;
-        patientCallBtn.disabled = false;
+        const learningCallBtn = document.getElementById('learningCallBtn');
+        const patientCallBtn = document.getElementById('patientCallBtn');
+        if (learningCallBtn) learningCallBtn.disabled = false;
+        if (patientCallBtn) patientCallBtn.disabled = false;
         
         // Show error message to user
         addMessage('bot', `Failed to start call: ${error.message}`);
@@ -359,34 +358,30 @@ function handleVapiMessage(message) {
     }
 }
 
-// Add message to chat
+// Add a message to the chat
 function addMessage(sender, content) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+    
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}-message iphone-message`;
     
+    const icon = sender === 'bot' ? 'fas fa-robot' : 'fas fa-user';
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content iphone-style';
+    messageContent.innerHTML = `<i class="${icon}"></i><p>${content}</p>`;
     
-    const icon = document.createElement('i');
-    icon.className = sender === 'bot' ? 'fas fa-robot' : 'fas fa-user';
-    
-    const text = document.createElement('p');
-    text.textContent = content;
-    
-    messageContent.appendChild(icon);
-    messageContent.appendChild(text);
-    messageDiv.appendChild(messageContent);
-    
-    // Add timestamp
     const timeDiv = document.createElement('div');
     timeDiv.className = 'message-time iphone-style';
-    timeDiv.textContent = getCurrentTime();
+    timeDiv.textContent = 'Just now';
+    
+    messageDiv.appendChild(messageContent);
     messageDiv.appendChild(timeDiv);
     
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
-    // Update message counts
+    // Update message count
     messageCountValue++;
     if (sender === 'user') {
         userMessageCount++;
@@ -394,8 +389,9 @@ function addMessage(sender, content) {
         botMessageCount++;
     }
     
-    // Update word count
-    totalWordCount += content.split(' ').length;
+    // Count words
+    const words = content.split(' ').length;
+    totalWordCount += words;
     
     updateAnalytics();
 }
@@ -405,7 +401,6 @@ function showTypingIndicator() {
     const typingIndicator = document.getElementById('typingIndicator');
     if (typingIndicator) {
         typingIndicator.style.display = 'flex';
-        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 }
 
@@ -431,29 +426,45 @@ function updateConnectionStatus(status) {
 
 // Show call controls
 function showCallControls() {
+    // Keep call modes section visible but show end call button
+    // Don't hide: document.getElementById('callModes').style.display = 'none';
+    
     // Show the appropriate end call button in the call modes section
     if (currentCallMode) {
+        const learningEndCallBtn = document.getElementById('learningEndCallBtn');
+        const patientEndCallBtn = document.getElementById('patientEndCallBtn');
+        const learningCallBtn = document.getElementById('learningCallBtn');
+        const patientCallBtn = document.getElementById('patientCallBtn');
+        
         if (currentCallMode.id === 'learning') {
-            learningEndCallBtn.style.display = 'block';
-            learningCallBtn.style.display = 'none'; // Hide start button
+            if (learningEndCallBtn) learningEndCallBtn.style.display = 'block';
+            if (learningCallBtn) learningCallBtn.style.display = 'none'; // Hide start button
         } else if (currentCallMode.id === 'patient') {
-            patientEndCallBtn.style.display = 'block';
-            patientCallBtn.style.display = 'none'; // Hide start button
+            if (patientEndCallBtn) patientEndCallBtn.style.display = 'block';
+            if (patientCallBtn) patientCallBtn.style.display = 'none'; // Hide start button
         }
     }
 }
 
 // Hide call controls
 function hideCallControls() {
+    // Show call mode selection (already visible)
+    // document.getElementById('callModes').style.display = 'flex';
+    
     // Hide all end call buttons and show start buttons in the call modes section
-    learningEndCallBtn.style.display = 'none';
-    patientEndCallBtn.style.display = 'none';
-    learningCallBtn.style.display = 'block'; // Show start button
-    patientCallBtn.style.display = 'block'; // Show start button
+    const learningEndCallBtn = document.getElementById('learningEndCallBtn');
+    const patientEndCallBtn = document.getElementById('patientEndCallBtn');
+    const learningCallBtn = document.getElementById('learningCallBtn');
+    const patientCallBtn = document.getElementById('patientCallBtn');
+    
+    if (learningEndCallBtn) learningEndCallBtn.style.display = 'none';
+    if (patientEndCallBtn) patientEndCallBtn.style.display = 'none';
+    if (learningCallBtn) learningCallBtn.style.display = 'block'; // Show start button
+    if (patientCallBtn) patientCallBtn.style.display = 'block'; // Show start button
     
     // Re-enable call buttons
-    learningCallBtn.disabled = false;
-    patientCallBtn.disabled = false;
+    if (learningCallBtn) learningCallBtn.disabled = false;
+    if (patientCallBtn) patientCallBtn.disabled = false;
     
     // Hide summary section
     const summarySection = document.getElementById('summarySection');
@@ -491,6 +502,7 @@ function updateVolumeLevel(volume) {
 // Update analytics (simplified)
 function updateAnalytics() {
     // Update message count
+    const messageCount = document.getElementById('messageCount');
     if (messageCount) {
         messageCount.textContent = `${messageCountValue} messages`;
     }
@@ -608,9 +620,12 @@ function displayConversationSummary() {
 // Clear conversation summary
 function clearConversationSummary() {
     // Remove any existing summary from the chat
-    const existingSummary = chatMessages.querySelector('.conversation-summary');
-    if (existingSummary) {
-        existingSummary.remove();
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        const existingSummary = chatMessages.querySelector('.conversation-summary');
+        if (existingSummary) {
+            existingSummary.remove();
+        }
     }
     
     // Reset summary data
@@ -626,75 +641,3 @@ function getSentimentIcon(sentiment) {
         default: return 'meh';
     }
 }
-
-// Test function for debugging
-window.testCallStart = function(mode) {
-    console.log(`Testing call start for mode: ${mode}`);
-    
-    // Set the current call mode
-    currentCallMode = CALL_MODES[mode];
-    console.log('Current call mode:', currentCallMode);
-    console.log('Vapi instance:', vapi);
-    console.log('Assistant ID:', currentCallMode.vapiAssistantId);
-    
-    // Simulate a call start
-    if (currentCallMode) {
-        addMessage('bot', `Test: Starting ${currentCallMode.name} call with Assistant ID: ${currentCallMode.vapiAssistantId}...`);
-        showCallControls();
-        startCallTimer();
-        // startCountdownTimer(); // Removed countdown timer
-        
-        setTimeout(() => {
-            addMessage('bot', currentCallMode.firstMessage);
-        }, 1000);
-    } else {
-        console.error('No call mode set');
-    }
-};
-
-// Test Vapi integration with actual assistant IDs
-window.testVapiCall = async function(mode) {
-    try {
-        console.log(`Testing Vapi call for mode: ${mode}`);
-        
-        // Set the current call mode
-        currentCallMode = CALL_MODES[mode];
-        if (!currentCallMode) {
-            throw new Error(`Invalid call mode: ${mode}`);
-        }
-        
-        console.log('Call mode:', currentCallMode.name);
-        console.log('Assistant ID:', currentCallMode.vapiAssistantId);
-        
-        // Disable buttons
-        learningCallBtn.disabled = true;
-        patientCallBtn.disabled = true;
-        
-        // Try to start the actual Vapi call
-        console.log('Starting Vapi call...');
-        await vapi.start(currentCallMode.vapiAssistantId);
-        
-        console.log('Vapi call started successfully!');
-        addMessage('bot', `✅ Vapi call started successfully with ${currentCallMode.name} assistant!`);
-        
-        // Show call controls
-        showCallControls();
-        startCallTimer();
-        // startCountdownTimer(); // Removed countdown timer
-        
-    } catch (error) {
-        console.error('Vapi call failed:', error);
-        addMessage('bot', `❌ Vapi call failed: ${error.message}`);
-        
-        // Re-enable buttons
-        learningCallBtn.disabled = false;
-        patientCallBtn.disabled = false;
-    }
-};
-
-// Make functions globally accessible for debugging
-window.startCall = startCall;
-window.stopCall = stopCall;
-window.showCallControls = showCallControls;
-window.hideCallControls = hideCallControls;
-window.testVapiCall = testVapiCall;
